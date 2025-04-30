@@ -77,7 +77,7 @@ contract WalletX {
 
         WalletMember[] memory members = walletOrganisationMembers[msg.sender];
 
-        for(uint256 i = 0; i <= walletOrganisationMembers[msg.sender].length; i++) {
+        for(uint256 i = 0; i < walletOrganisationMembers[msg.sender].length; i++) {
             if (members[i].memberIdentifier == _memberIdentifier) {
                 members[i].spendLimit += _amount;
                 IERC20(tokenAddress).approve(members[i].memberAddress, _amount);
