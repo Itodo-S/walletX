@@ -17,15 +17,15 @@ const config: HardhatUserConfig = {
   etherscan: {
     // Use "123" as a placeholder, because Blockscout doesn't need a real API key, and Hardhat will complain if this property isn't set.
     apiKey: {
-      "sepolia": "MAFIZSSR3PPQYEPVGAVBBP5H7ABGVSC8AQ",
+      "base-sepolia": "G8T4ZHG7MDPFYRUUXQD5SEZG3PRKDQHI6E",
     },
     customChains: [
       {
-        network: "lisk-sepolia",
-        chainId: 4202,
+        network: "base-sepolia",
+        chainId: 84532,
         urls: {
-          apiURL: "https://sepolia-blockscout.lisk.com/api",
-          browserURL: "https://sepolia-blockscout.lisk.com/",
+          apiURL: "https://api-sepolia.basescan.org/api",
+          browserURL: "https://sepolia.basescan.org/",
         },
       },
     ],
