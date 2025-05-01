@@ -5,15 +5,15 @@ import { motion } from "framer-motion";
 import { NavLink } from "react-router-dom";
 
 const XWalletHeader = () => {
-    const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
-    useEffect(() => {
-      if (darkMode) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-    }, [darkMode]);
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
   return (
     <header className="w-full py-2 px-4 md:px-8 shadow-sm bg-primay dark:bg-card">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -27,16 +27,28 @@ const XWalletHeader = () => {
           XWallet
         </motion.h1>
         <nav className="space-x-6 hidden md:flex">
-          <NavLink to="#features" className="hover:text-primary font-semibold">
-            Features
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `font-semibold ${isActive ? "text-primary" : "hover:text-primary"}`
+            }
+          >
+            Home
           </NavLink>
           <NavLink
-            to="#how-it-works"
-            className="hover:text-primary font-semibold"
+            to="/wallet"
+            className={({ isActive }) =>
+              `font-semibold ${isActive ? "text-primary" : "hover:text-primary"}`
+            }
           >
-            How It Works
+            Wallet
           </NavLink>
-          <NavLink to="#contact" className="hover:text-primary font-semibold">
+          <NavLink
+            to="/contact"
+            className={({ isActive }) =>
+              `font-semibold ${isActive ? "text-primary" : "hover:text-primary"}`
+            }
+          >
             Contact
           </NavLink>
         </nav>

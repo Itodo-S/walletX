@@ -34,7 +34,26 @@
   }
 }
 
-
 body {
   margin: 0;
+}
+
+/* Slim scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px; /* Slim width */
+  height: 8px; /* Slim height for horizontal scrollbars */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-text)); /* Use muted text color */
+  border-radius: 4px; /* Rounded edges */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--foreground)); /* Darker color on hover */
+}
+
+::-webkit-scrollbar-track {
+  background-color: hsl(var(--background)); /* Match background color */
+  border-radius: 4px; /* Rounded edges */
 }

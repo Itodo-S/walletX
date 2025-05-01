@@ -9,6 +9,8 @@ import {
 
 // PAGES
 import Home from "../pages/home/Home";
+import DashboardLayout from "../layout/DashboardLayout";
+import Dashboard from "../pages/Dashboard/Dashboard";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -17,9 +19,9 @@ const router = createBrowserRouter(
       <Route index element={<Home />} />
 
       {/* EVERY OTHER PAGE ROUTING SHOULD BE DONE IN HERE */}
-      <Route path="dashboard" element={<h1>HELLOOOOOOOOOOOOOOO</h1>}>
-        {/* TO NAVIGATE TO THIS ROUTE JUST GO TO: /flexi/example  */}
-        {/* <Route path="governance" element={<h1>Governance Page</h1>} /> */}
+      <Route path="/dashboard" element={<DashboardLayout />}>
+        {/* TO NAVIGATE TO THIS ROUTE JUST GO TO: /dashboard */}
+        <Route path="" element={<Dashboard />} />
       </Route>
     </Route>
   )
