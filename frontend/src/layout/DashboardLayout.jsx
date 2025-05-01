@@ -69,7 +69,7 @@ const DashboardLayout = () => {
       {/* Sidebar */}
       <aside className="w-64 flex-shrink-0 bg-[hsl(var(--card))] border-r border-[hsl(var(--border))] p-6 flex flex-col justify-between">
         <div>
-          <h1 className="text-2xl font-bold mb-8">XWallet</h1>
+          <h1 className="text-2xl font-bold mb-8 cursor-pointer" onClick={()=>navigate("/")}>XWallet</h1>
           <nav className="space-y-2">
             {navItems.map((item) => {
               const isActive = location.pathname === item.href;

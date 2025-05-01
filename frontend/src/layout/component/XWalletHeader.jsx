@@ -30,15 +30,19 @@ const XWalletHeader = () => {
           <NavLink
             to="/"
             className={({ isActive }) =>
-              `font-semibold ${isActive ? "text-primary" : "hover:text-primary"}`
+              `font-semibold ${
+                isActive ? "text-primary" : "hover:text-primary"
+              }`
             }
           >
             Home
           </NavLink>
           <NavLink
-            to="/wallet"
+            to="/dashboard"
             className={({ isActive }) =>
-              `font-semibold ${isActive ? "text-primary" : "hover:text-primary"}`
+              `font-semibold ${
+                isActive ? "text-primary" : "hover:text-primary"
+              }`
             }
           >
             Wallet
@@ -46,7 +50,9 @@ const XWalletHeader = () => {
           <NavLink
             to="/contact"
             className={({ isActive }) =>
-              `font-semibold ${isActive ? "text-primary" : "hover:text-primary"}`
+              `font-semibold ${
+                isActive ? "text-primary" : "hover:text-primary"
+              }`
             }
           >
             Contact
