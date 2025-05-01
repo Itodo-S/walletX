@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import family_budget from "../../assets/family-budget-concept.png";
 import XWalletFooter from "../../layout/component/XWalletFooter";
 import XWalletHeader from "../../layout/component/XWalletHeader";
+import '../../../connection';
 
 export default function LandingPage() {
   return (
@@ -28,12 +29,13 @@ export default function LandingPage() {
                 XWallet helps you manage, track, and teach financial
                 responsibility to your loved ones.
               </p>
-              <a
+              {/* <a
                 href="#connect"
                 className="inline-block px-8 py-3 bg-primary text-white rounded-2xl font-medium shadow hover:bg-primary-hover transition"
               >
                 Connect Wallet
-              </a>
+              </a> */}
+              <w3m-button />
             </div>
             {/* Hero Image */}
             <motion.div

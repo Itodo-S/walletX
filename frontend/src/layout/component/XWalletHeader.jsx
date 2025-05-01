@@ -3,6 +3,8 @@ import logo from "../../assets/logo.png";
 import { IconSun, IconMoon } from "@tabler/icons-react"; // Ensure this path is correct
 import { motion } from "framer-motion";
 import { NavLink } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const XWalletHeader = () => {
   const [darkMode, setDarkMode] = useState(false);
@@ -70,6 +72,7 @@ const XWalletHeader = () => {
           )}
         </button>
       </div>
+      <ToastContainer />
     </header>
   );
 };

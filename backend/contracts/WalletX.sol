@@ -18,6 +18,7 @@ contract WalletX {
     }
 
     struct WalletOrganisation {
+        address adminAddress;
         string walletName;
         bool active;
         uint walletId;
@@ -50,11 +51,12 @@ contract WalletX {
 
         // fund escrow with funds
         uint256 allowance = IERC20(tokenAddress).allowance(msg.sender, address(this));
-        require(allowance == _fundAmount, "No allowance to spend funds at the moment");
+        require(allowance >= _fundAmount, "No allowance to spend funds at the moment");
         IERC20(tokenAddress).transferFrom(msg.sender, address(this), _fundAmount);
 
 
         WalletOrganisation memory walletOrganisation = WalletOrganisation({
+            adminAddress: msg.sender,
             walletName: _walletName,
             active: true,
             walletId: walletIdTrack,
@@ -93,7 +95,7 @@ contract WalletX {
     function reimburseOrganization(uint256 _amount) external onlyAdmin {
         // fund escrow with funds
         uint256 allowance = IERC20(tokenAddress).allowance(msg.sender, address(this));
-        require(allowance == _amount, "No allowance to spend funds at the moment");
+        require(allowance >= _amount, "No allowance to spend funds at the moment");
         IERC20(tokenAddress).transferFrom(msg.sender, address(this), _amount);
 
 
@@ -127,6 +129,10 @@ contract WalletX {
 
     function getMember() external view returns(WalletMember memory member) {
         member = walletMember[msg.sender];
+    }
+
+    function getWalletAdmin() onlyAdmin() external view returns(WalletOrganisation memory admin) {
+        admin = walletAdmin[msg.sender];
     }
 
 
