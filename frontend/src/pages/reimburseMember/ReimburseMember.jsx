@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { IconUserDollar } from "@tabler/icons-react";
+import useContract from "../../hooks/useContract";
 
 const members = [
   { id: "john123", name: "John Doe" },
@@ -11,10 +12,35 @@ const ReimburseMember = () => {
   const [selectedMember, setSelectedMember] = useState("");
   const [amount, setAmount] = useState("");
 
-  const handleReimburse = () => {
-    console.log("Reimbursing member:", selectedMember, "Amount:", amount);
-    // Call reimburseMember(selectedMember, amount);
-  };
+  // const handleReimburse = () => {
+  //   console.log("Reimbursing member:", selectedMember, "Amount:", amount);
+  //   // Call reimburseMember(selectedMember, amount);
+  // };
+
+  const readOnlyOnboardContract = useContract(true);
+  const [members, setMembers] = useState([]);
+
+  const fetchMembers = useCallback(async () => {
+    if(!readOnlyOnboardContract) return;
+    console.log("provider: ", readOnlyOnboardContract.runner);
+
+    try {
+      const data = await readOnlyOnboardContract.getMembers();
+      const result = await data.toArray();
+      setMembers(result);
+
+      console.log("members", members)
+      console.log([...data][0].memberAddress);
+      
+
+    } catch (error) {
+      console.log("error fetching employees: ", error);
+    }
+  }, [readOnlyOnboardContract]);
+
+  useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
 
   return (
     <div className="max-w-xl mx-auto mt-10 bg-[hsl(var(--card))] p-8 rounded-xl border border-[hsl(var(--border))] shadow-md">
@@ -69,13 +95,13 @@ const ReimburseMember = () => {
 
         {/* Reimburse Button */}
         <div className="pt-4">
-          <button
+          {/* <button
             onClick={handleReimburse}
             className="bg-[hsl(var(--primary))] text-white px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.9)] transition"
             disabled={!selectedMember || !amount}
           >
             Reimburse
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
