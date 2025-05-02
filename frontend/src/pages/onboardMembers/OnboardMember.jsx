@@ -1,26 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IconUserPlus } from "@tabler/icons-react";
+import useOnboardMember from "../../hooks/useOnboardMember";
 
 const OnboardMembers = () => {
-  const [walletAddress, setWalletAddress] = useState("");
-  const [memberName, setMemberName] = useState("");
-  const [fundAmount, setFundAmount] = useState("");
-  const [memberId, setMemberId] = useState("");
+  const handleOnboardMember = useOnboardMember();
+  const [ member, setMember ] = useState({
+    walletAddress: "",
+    memberName: "",
+    fundAmount: 0,
+    memberId: ""
+  })
 
-  const handleApprove = () => {
-    // Logic to approve tokens before onboarding
-    console.log("Approving tokens for member spend limit...");
-  };
+  const handleInputChange = (name, e) => {
+    console.log(e.target.name)
+    setMember((preState) => ({ ...preState, [name]:  e.target.value}));
+  }
 
-  const handleOnboard = () => {
-    // Logic to onboard member via onboardMembers()
-    console.log("Onboarding member with data:", {
-      walletAddress,
-      memberName,
-      fundAmount,
-      memberId,
-    });
-  };
+  const { walletAddress, 
+          memberName, 
+          fundAmount, 
+          memberId
+         } = member
+
+  useEffect(()=>{
+      console.log(member)
+     }
+        
+     ,[member])
+  
 
   return (
     <div className="max-w-xl mx-auto mt-10 bg-[hsl(var(--card))] p-8 rounded-xl border border-[hsl(var(--border))] shadow-md">
@@ -37,7 +44,7 @@ const OnboardMembers = () => {
           <input
             type="text"
             value={walletAddress}
-            onChange={(e) => setWalletAddress(e.target.value)}
+            onChange={(e) => handleInputChange("walletAddress", e)}
             placeholder="0x..."
             className="w-full px-4 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-text))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)]"
           />
@@ -50,7 +57,7 @@ const OnboardMembers = () => {
           <input
             type="text"
             value={memberName}
-            onChange={(e) => setMemberName(e.target.value)}
+            onChange={(e) => handleInputChange("memberName", e)}
             placeholder="John Doe"
             className="w-full px-4 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-text))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)]"
           />
@@ -63,7 +70,7 @@ const OnboardMembers = () => {
           <input
             type="number"
             value={fundAmount}
-            onChange={(e) => setFundAmount(e.target.value)}
+            onChange={(e) => handleInputChange("fundAmount", e)}
             placeholder="100"
             className="w-full px-4 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-text))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)]"
           />
@@ -76,7 +83,7 @@ const OnboardMembers = () => {
           <input
             type="text"
             value={memberId}
-            onChange={(e) => setMemberId(e.target.value)}
+            onChange={(e) => handleInputChange("memberId", e)}
             placeholder="E.g. employee123"
             className="w-full px-4 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-text))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)]"
           />
@@ -84,14 +91,23 @@ const OnboardMembers = () => {
 
         <div className="flex gap-4 pt-4">
           <button
-            onClick={handleApprove}
+            // onClick={handleApprove}
             className="bg-[hsl(var(--primary))] text-white px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.9)] transition"
           >
             Approve Tokens
           </button>
 
           <button
-            onClick={handleOnboard}
+            onClick={(e) => {
+              e.preventDefault()
+              console.log(walletAddress, memberName, fundAmount, memberId)
+              handleOnboardMember(
+                walletAddress, 
+                memberName, 
+                fundAmount, 
+                memberId
+              )
+            }}
             className="border border-[hsl(var(--primary))] text-[hsl(var(--primary))] px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.05)] transition"
           >
             Onboard Member
