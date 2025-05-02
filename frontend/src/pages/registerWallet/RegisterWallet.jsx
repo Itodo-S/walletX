@@ -1,40 +1,32 @@
-import React, { useState, useEffect } from "react";
-import { IconCheck, IconWallet } from "@tabler/icons-react";
+import React, { useState } from "react";
+import { IconCheck, IconWallet, IconLoader } from "@tabler/icons-react";
 import useRegisterWallet from "../../hooks/useRegisterWallet";
 
 const RegisterWallet = () => {
-  // const [walletName, setWalletName] = useState("");
-  // const [fundAmount, setFundAmount] = useState("");
   const handleRegisterWallet = useRegisterWallet();
-  const [ wallet, setWallet ] = useState({
+  const [wallet, setWallet] = useState({
     walletName: "",
-    fundAmount: 0
-  })
+    fundAmount: 0,
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (name, e) => {
-    console.log(e.target.name)
-    setWallet((preState) => ({ ...preState, [name]:  e.target.value}));
-  }
+    setWallet((preState) => ({ ...preState, [name]: e.target.value }));
+  };
 
   const { walletName, fundAmount } = wallet;
 
-  useEffect(()=>{
-    console.log(wallet)
-   }
-      
-   ,[wallet])
-
-
-
-  // const handleApprove = () => {
-  //   // call approve() logic here
-  //   console.log("Approving tokens for escrow...");
-  // };
-
-  // const handleRegister = () => {
-  //   // call registerWallet() logic here
-  //   console.log("Registering wallet with:", walletName, fundAmount);
-  // };
+  const handleRegisterClick = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      await handleRegisterWallet(walletName, fundAmount);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error registering wallet:", error);
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-xl mx-auto mt-10 bg-[hsl(var(--card))] p-8 rounded-xl border border-[hsl(var(--border))] shadow-md">
@@ -72,24 +64,14 @@ const RegisterWallet = () => {
 
         <div className="flex gap-4 pt-4">
           <button
-            className="bg-[hsl(var(--primary))] text-white px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.9)] transition"
+            className="border border-[hsl(var(--primary))] text-[hsl(var(--primary))] px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.05)] transition disabled:opacity-50 flex items-center gap-2"
+            onClick={handleRegisterClick}
+            disabled={isLoading}
           >
-            Approve Tokens
-          </button>
-
-          <button
-    
-            className="border border-[hsl(var(--primary))] text-[hsl(var(--primary))] px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.05)] transition"
-            onClick={(e) => {
-              e.preventDefault()
-              console.log(walletName, fundAmount)
-              handleRegisterWallet(
-                walletName,
-                fundAmount
-              )
-            }}
-          >
-            Register Wallet
+            {isLoading && (
+              <IconLoader size={18} className="animate-spin" />
+            )}
+            {isLoading ? "Registering..." : "Register Wallet"}
           </button>
         </div>
       </div>

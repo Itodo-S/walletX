@@ -5,16 +5,17 @@ import useTokenContract from "./useTokenContract";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useAppKitNetwork } from "@reown/appkit/react";
 import { baseSepolia } from "@reown/appkit/networks";
-import { parseEther, parseUnits } from "ethers";
+import { parseUnits } from "ethers";
 
-const useRegisterWallet = () => {
+const useOnboardMember = () => {
   const contract = useContract(true);
   const tokenContract = useTokenContract(true);
   const { address } = useAppKitAccount();
   const { chainId } = useAppKitNetwork();
+
   return useCallback(
-    async (walletName, fundAmount) => {
-      if (!walletName || !fundAmount) {
+    async (memberAddress, memberName, fundAmount, memberIdentifier) => {
+      if (!memberAddress || !memberName || !fundAmount || !memberIdentifier) {
         toast.error("Missing field(s)");
         return;
       }
@@ -40,36 +41,44 @@ const useRegisterWallet = () => {
           parsedPayment
         );
 
-        const tokenReciept = await approveToken.wait();
-
-        // @simon commented this cuz it was causing issues when i use decimal value
-        // const parsedAmount = BigInt(fundAmount);
+        const tokenReceipt = await approveToken.wait();
 
         const parsedAmount = parseUnits(fundAmount.toString(), 18);
 
-        const estimatedGas = await contract.registerWallet.estimateGas(
-          walletName,
-          parsedAmount
+        const estimatedGas = await contract.onboardMembers.estimateGas(
+          memberAddress,
+          memberName,
+          parsedAmount,
+          memberIdentifier
         );
-        const tx = await contract.registerWallet(walletName, parsedAmount, {
-          gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
-        });
-        const reciept = await tx.wait();
+        const tx = await contract.onboardMembers(
+          memberAddress,
+          memberName,
+          parsedAmount,
+          memberIdentifier,
+          {
+            gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
+          }
+        );
+        const receipt = await tx.wait();
 
-        if (reciept.status === 1) {
-          toast.success("Wallet Registered successful");
+        if (receipt.status === 1) {
+          toast.success("Member onboarded successfully");
           return;
         }
-        toast.error("Wallet registration failed");
+        toast.error("Onboarding member failed");
         return;
       } catch (error) {
         console.trace(error);
-        console.error("error while registering wallet: ", error);
-        toast.error("Registering wallet errored");
+        console.error("Error while onboarding member: ", error);
+
+        // Extract and display the reason if available
+        const errorReason = error?.reason || "Onboarding member errored";
+        toast.error(errorReason);
       }
     },
     [address, chainId, contract]
   );
 };
 
-export default useRegisterWallet;
+export default useOnboardMember;

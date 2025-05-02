@@ -1,25 +1,38 @@
 import React, { useState } from "react";
-import { IconUserPlus } from "@tabler/icons-react";
+import { IconCheck, IconUserPlus, IconLoader } from "@tabler/icons-react";
+import useOnboardMember from "../../hooks/useOnboardMember";
 
-const OnboardMembers = () => {
-  const [walletAddress, setWalletAddress] = useState("");
-  const [memberName, setMemberName] = useState("");
-  const [fundAmount, setFundAmount] = useState("");
-  const [memberId, setMemberId] = useState("");
+const OnboardMember = () => {
+  const handleOnboardMember = useOnboardMember();
+  const [member, setMember] = useState({
+    memberAddress: "",
+    memberName: "",
+    fundAmount: 0,
+    memberIdentifier: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleApprove = () => {
-    // Logic to approve tokens before onboarding
-    console.log("Approving tokens for member spend limit...");
+  const handleInputChange = (name, e) => {
+    setMember((prevState) => ({ ...prevState, [name]: e.target.value }));
   };
 
-  const handleOnboard = () => {
-    // Logic to onboard member via onboardMembers()
-    console.log("Onboarding member with data:", {
-      walletAddress,
-      memberName,
-      fundAmount,
-      memberId,
-    });
+  const { memberAddress, memberName, fundAmount, memberIdentifier } = member;
+
+  const handleOnboardClick = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      await handleOnboardMember(
+        memberAddress,
+        memberName,
+        fundAmount,
+        memberIdentifier
+      );
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error onboarding member:", error);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -32,13 +45,13 @@ const OnboardMembers = () => {
       <div className="space-y-4">
         <div>
           <label className="block text-sm text-[hsl(var(--muted-text))] mb-1">
-            Member Wallet Address
+            Member Address
           </label>
           <input
             type="text"
-            value={walletAddress}
-            onChange={(e) => setWalletAddress(e.target.value)}
-            placeholder="0x..."
+            value={memberAddress}
+            onChange={(e) => handleInputChange("memberAddress", e)}
+            placeholder="Enter member address"
             className="w-full px-4 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-text))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)]"
           />
         </div>
@@ -50,51 +63,46 @@ const OnboardMembers = () => {
           <input
             type="text"
             value={memberName}
-            onChange={(e) => setMemberName(e.target.value)}
-            placeholder="John Doe"
+            onChange={(e) => handleInputChange("memberName", e)}
+            placeholder="Enter member name"
             className="w-full px-4 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-text))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)]"
           />
         </div>
 
         <div>
           <label className="block text-sm text-[hsl(var(--muted-text))] mb-1">
-            Spend Limit
+            Fund Amount
           </label>
           <input
             type="number"
             value={fundAmount}
-            onChange={(e) => setFundAmount(e.target.value)}
-            placeholder="100"
+            onChange={(e) => handleInputChange("fundAmount", e)}
+            placeholder="Enter amount to fund"
             className="w-full px-4 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-text))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)]"
           />
         </div>
 
         <div>
           <label className="block text-sm text-[hsl(var(--muted-text))] mb-1">
-            Unique Member Identifier
+            Member Identifier
           </label>
           <input
             type="text"
-            value={memberId}
-            onChange={(e) => setMemberId(e.target.value)}
-            placeholder="E.g. employee123"
+            value={memberIdentifier}
+            onChange={(e) => handleInputChange("memberIdentifier", e)}
+            placeholder="Enter member identifier"
             className="w-full px-4 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-text))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)]"
           />
         </div>
 
         <div className="flex gap-4 pt-4">
           <button
-            onClick={handleApprove}
-            className="bg-[hsl(var(--primary))] text-white px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.9)] transition"
+            className="border border-[hsl(var(--primary))] text-[hsl(var(--primary))] px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.05)] transition disabled:opacity-50 flex items-center gap-2"
+            onClick={handleOnboardClick}
+            disabled={isLoading}
           >
-            Approve Tokens
-          </button>
-
-          <button
-            onClick={handleOnboard}
-            className="border border-[hsl(var(--primary))] text-[hsl(var(--primary))] px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.05)] transition"
-          >
-            Onboard Member
+            {isLoading && <IconLoader size={18} className="animate-spin" />}
+            {isLoading ? "Onboarding..." : "Onboard Member"}
           </button>
         </div>
       </div>
@@ -102,4 +110,4 @@ const OnboardMembers = () => {
   );
 };
 
-export default OnboardMembers;
+export default OnboardMember;

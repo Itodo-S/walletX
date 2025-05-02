@@ -42,7 +42,7 @@ const members = [
 
 const Dashboard = () => {
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 w-[80%] mx-auto">
       {/* Welcome Section */}
       <h2 className="text-2xl font-semibold text-[hsl(var(--foreground))]">
         Welcome, {userRole === "admin" ? "Admin" : "Member"}

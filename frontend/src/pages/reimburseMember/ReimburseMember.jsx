@@ -1,15 +1,29 @@
-import React, { useState } from "react";
-import { IconUserDollar } from "@tabler/icons-react";
-
-const members = [
-  { id: "john123", name: "John Doe" },
-  { id: "jane456", name: "Jane Smith" },
-  { id: "alex789", name: "Alex Johnson" },
-];
+import React, { useState, useEffect } from "react";
+import { IconUserDollar, IconLoader } from "@tabler/icons-react";
+import useGetMembers from "../../hooks/useGetMembers";
 
 const ReimburseMember = () => {
   const [selectedMember, setSelectedMember] = useState("");
   const [amount, setAmount] = useState("");
+  const [members, setMembers] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const getMembers = useGetMembers();
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      setIsLoading(true);
+      try {
+        const fetchedMembers = await getMembers();
+        setMembers(fetchedMembers || []);
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, [getMembers]);
 
   const handleReimburse = () => {
     console.log("Reimbursing member:", selectedMember, "Amount:", amount);
@@ -29,28 +43,35 @@ const ReimburseMember = () => {
           <label className="block text-sm text-[hsl(var(--muted-text))] mb-1">
             Select Member
           </label>
-          <select
-            value={selectedMember}
-            onChange={(e) => setSelectedMember(e.target.value)}
-            className="w-full px-4 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-text))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)] appearance-none"
-          >
-            <option
-              value=""
-              disabled
-              className="bg-[hsl(var(--input))] text-[hsl(var(--muted-text))]"
+          {isLoading ? (
+            <div className="flex items-center gap-2 text-[hsl(var(--muted-text))]">
+              <IconLoader size={18} className="animate-spin" />
+              Loading members...
+            </div>
+          ) : (
+            <select
+              value={selectedMember}
+              onChange={(e) => setSelectedMember(e.target.value)}
+              className="w-full px-4 py-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--input))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-text))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)] appearance-none"
             >
-              -- Select Member --
-            </option>
-            {members.map((member) => (
               <option
-                key={member.id}
-                value={member.id}
-                className="bg-[hsl(var(--input))] text-[hsl(var(--foreground))]"
+                value=""
+                disabled
+                className="bg-[hsl(var(--input))] text-[hsl(var(--muted-text))]"
               >
-                {member.name} ({member.id})
+                -- Select Member --
               </option>
-            ))}
-          </select>
+              {members.map((member) => (
+                <option
+                  key={member.memberIdentifier}
+                  value={member.memberIdentifier}
+                  className="bg-[hsl(var(--input))] text-[hsl(var(--foreground))]"
+                >
+                  {member.name} ({member.memberAddress})
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         {/* Amount Input */}

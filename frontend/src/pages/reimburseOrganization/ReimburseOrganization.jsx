@@ -1,17 +1,27 @@
 import React, { useState } from "react";
-import { IconBuildingBank } from "@tabler/icons-react";
+import { IconBuildingBank, IconLoader } from "@tabler/icons-react";
+import useReimburseOrg from "../../hooks/useReimburseOrg";
 
 const ReimburseOrganization = () => {
   const [reimburseAmount, setReimburseAmount] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const reimburseOrg = useReimburseOrg();
 
-  const handleApprove = () => {
-    // Logic to approve tokens before reimbursement
-    console.log("Approving tokens for reimbursement...");
-  };
-
-  const handleReimburse = () => {
-    // Logic to call reimburseOrganization()
-    console.log("Reimbursing organization with:", reimburseAmount);
+  const handleReimburse = async () => {
+    if (!reimburseAmount) {
+      console.error("Reimbursement amount is required");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await reimburseOrg(reimburseAmount);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error reimbursing organization:", error);
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -37,17 +47,12 @@ const ReimburseOrganization = () => {
 
         <div className="flex gap-4 pt-4">
           <button
-            onClick={handleApprove}
-            className="bg-[hsl(var(--primary))] text-white px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.9)] transition"
-          >
-            Approve Tokens
-          </button>
-
-          <button
             onClick={handleReimburse}
-            className="border border-[hsl(var(--primary))] text-[hsl(var(--primary))] px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.05)] transition"
+            disabled={isLoading}
+            className="border border-[hsl(var(--primary))] text-[hsl(var(--primary))] px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.05)] transition disabled:opacity-50 flex items-center gap-2"
           >
-            Reimburse
+            {isLoading && <IconLoader size={18} className="animate-spin" />}
+            {isLoading ? "Reimbursing..." : "Reimburse"}
           </button>
         </div>
       </div>
