@@ -1,41 +1,51 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { IconUserDollar } from "@tabler/icons-react";
+import { IconUserDollar, IconLoader2 } from "@tabler/icons-react";
 import useContract from "../../hooks/useContract";
+import useReimburseMember from "../../hooks/useReimburseMember";
 
 const ReimburseMember = () => {
   const [selectedMember, setSelectedMember] = useState("");
   const [amount, setAmount] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const readOnlyOnboardContract = useContract(true);
+  const reimburseMember = useReimburseMember();
   const [members, setMembers] = useState([]);
-
-  console.log({ members });
 
   const fetchMembers = useCallback(async () => {
     if (!readOnlyOnboardContract) return;
-    console.log("provider: ", readOnlyOnboardContract.runner);
 
     try {
       const data = await readOnlyOnboardContract.getMembers();
       const result = await data.toArray();
 
-      // Parse the result to extract member details
       const parsedMembers = result.map((member) => ({
-        id: member[0], // Assuming the first element is the member ID/address
-        name: member[2], // Assuming the third element is the member name
+        id: member[0],
+        name: member[2],
       }));
 
       setMembers(parsedMembers);
-
-      console.log("Parsed members:", parsedMembers);
     } catch (error) {
-      console.log("error fetching employees: ", error);
+      console.log("Error fetching members: ", error);
     }
   }, [readOnlyOnboardContract]);
 
   useEffect(() => {
     fetchMembers();
   }, [fetchMembers]);
+
+  const handleReimburse = async () => {
+    if (!selectedMember || !amount) return;
+
+    setIsProcessing(true);
+    try {
+      await reimburseMember(selectedMember, amount);
+    } catch (error) {
+      console.error("Error during reimbursement: ", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="max-w-xl mx-auto mt-10 bg-[hsl(var(--card))] p-8 rounded-xl border border-[hsl(var(--border))] shadow-md">
@@ -90,13 +100,16 @@ const ReimburseMember = () => {
 
         {/* Reimburse Button */}
         <div className="pt-4">
-          {/* <button
+          <button
             onClick={handleReimburse}
-            className="bg-[hsl(var(--primary))] text-white px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.9)] transition"
-            disabled={!selectedMember || !amount}
+            className="bg-[hsl(var(--primary))] text-white px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.9)] transition flex items-center justify-center gap-2"
+            disabled={!selectedMember || !amount || isProcessing}
           >
-            Reimburse
-          </button> */}
+            {isProcessing && (
+              <IconLoader2 className="animate-spin" size={20} />
+            )}
+            {isProcessing ? "Processing..." : "Reimburse"}
+          </button>
         </div>
       </div>
     </div>
