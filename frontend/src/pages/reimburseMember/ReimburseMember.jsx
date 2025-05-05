@@ -2,37 +2,32 @@ import React, { useState, useCallback, useEffect } from "react";
 import { IconUserDollar } from "@tabler/icons-react";
 import useContract from "../../hooks/useContract";
 
-const members = [
-  { id: "john123", name: "John Doe" },
-  { id: "jane456", name: "Jane Smith" },
-  { id: "alex789", name: "Alex Johnson" },
-];
-
 const ReimburseMember = () => {
   const [selectedMember, setSelectedMember] = useState("");
   const [amount, setAmount] = useState("");
 
-  // const handleReimburse = () => {
-  //   console.log("Reimbursing member:", selectedMember, "Amount:", amount);
-  //   // Call reimburseMember(selectedMember, amount);
-  // };
-
   const readOnlyOnboardContract = useContract(true);
   const [members, setMembers] = useState([]);
 
+  console.log({ members });
+
   const fetchMembers = useCallback(async () => {
-    if(!readOnlyOnboardContract) return;
+    if (!readOnlyOnboardContract) return;
     console.log("provider: ", readOnlyOnboardContract.runner);
 
     try {
       const data = await readOnlyOnboardContract.getMembers();
       const result = await data.toArray();
-      setMembers(result);
 
-      console.log("members", members)
-      console.log([...data][0].memberAddress);
-      
+      // Parse the result to extract member details
+      const parsedMembers = result.map((member) => ({
+        id: member[0], // Assuming the first element is the member ID/address
+        name: member[2], // Assuming the third element is the member name
+      }));
 
+      setMembers(parsedMembers);
+
+      console.log("Parsed members:", parsedMembers);
     } catch (error) {
       console.log("error fetching employees: ", error);
     }
