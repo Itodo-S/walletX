@@ -38,7 +38,7 @@ const useReimburseWallet = () => {
 
                 const parsedPayment = parseUnits(reimburseAmount.toString(), 18);
 
-                const approveToken = await tokenContract.approve("0x3f4d0Fc9a72dcEDd31Df0255dC9a371C4624595A", parsedPayment);
+                const approveToken = await tokenContract.approve("0x7E253e994E213C592419fE9cD4ea58359648Fce9", parsedPayment);
 
                 const tokenReciept = await approveToken.wait();
 
