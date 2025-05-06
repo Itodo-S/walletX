@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { IconUserDollar, IconLoader2 } from "@tabler/icons-react";
+import { IconUserDollar, IconLoader2, IconLoader } from "@tabler/icons-react";
 import useContract from "../../hooks/useContract";
 import useReimburseMember from "../../hooks/useReimburseMember";
 
@@ -101,13 +101,11 @@ const ReimburseMember = () => {
         {/* Reimburse Button */}
         <div className="pt-4">
           <button
+            className="border border-[hsl(var(--primary))] text-[hsl(var(--primary))] px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.05)] transition disabled:opacity-50 flex items-center gap-2"
             onClick={handleReimburse}
-            className="bg-[hsl(var(--primary))] text-white px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.9)] transition flex items-center justify-center gap-2"
             disabled={!selectedMember || !amount || isProcessing}
           >
-            {isProcessing && (
-              <IconLoader2 className="animate-spin" size={20} />
-            )}
+            {isProcessing && <IconLoader size={18} className="animate-spin" />}
             {isProcessing ? "Processing..." : "Reimburse"}
           </button>
         </div>
