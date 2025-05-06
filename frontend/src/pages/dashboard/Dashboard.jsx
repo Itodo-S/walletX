@@ -13,6 +13,9 @@ const Dashboard = () => {
     organizationName: "",
     memberSpendLimit: "",
   });
+
+  console.log(walletInfo);
+  
   const readOnlyOnboardContract = useContract(true);
 
   const fetchMembers = useCallback(async () => {
@@ -27,6 +30,8 @@ const Dashboard = () => {
         name: member[2],
       }));
 
+      console.log("result:", result);
+      
       setMembers(parsedMembers);
     } catch (error) {
       console.log("Error fetching members: ", error);
