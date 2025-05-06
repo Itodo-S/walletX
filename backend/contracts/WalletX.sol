@@ -23,6 +23,7 @@ contract WalletX {
         bool active;
         uint walletId;
         uint walletBalance;
+        string role;
     }
 
     struct WalletMember {
@@ -32,12 +33,20 @@ contract WalletX {
         bool active;
         uint256 spendLimit; 
         uint256 memberIdentifier;
+        string role;
+    }
+
+    struct memberTransaction {
+        uint256 amount;
+        address reciever;
     }
 
     mapping (address => WalletOrganisation) walletAdmin;
     mapping (address => WalletMember) walletMember;
 
     mapping (address => WalletMember[]) walletOrganisationMembers;
+    mapping (address => memberTransaction[]) memberTransactions; 
+
 
     uint256 walletIdTrack = 1;
 
@@ -60,7 +69,8 @@ contract WalletX {
             walletName: _walletName,
             active: true,
             walletId: walletIdTrack,
-            walletBalance: _fundAmount
+            walletBalance: _fundAmount,
+            role: "admin"
         });
 
         walletIdTrack += 1;
@@ -84,7 +94,8 @@ contract WalletX {
             name: _memberName,
             active: true,
             spendLimit: _fundAmount,
-            memberIdentifier: _memberIdentifier
+            memberIdentifier: _memberIdentifier,
+            role: "member"
         });
 
         walletMember[_memberAddress] = member;
@@ -120,6 +131,24 @@ contract WalletX {
         }
     }
 
+    function memberWithdrawal(uint256 _amount, address _reciever) external {
+        WalletMember storage member = walletMember[msg.sender];
+
+        require(member.spendLimit >= _amount, "insufficient funds to withdraw");
+
+        member.spendLimit -= _amount;
+
+        IERC20(tokenAddress).transfer(_reciever, _amount);
+
+        memberTransaction memory memberTxs = memberTransaction({
+            amount: _amount,
+            reciever: _reciever
+        });
+
+        memberTransactions[msg.sender].push(memberTxs);
+
+    }
+
 
     // Read functions
 
@@ -133,6 +162,17 @@ contract WalletX {
 
     function getWalletAdmin() onlyAdmin() external view returns(WalletOrganisation memory admin) {
         admin = walletAdmin[msg.sender];
+    }
+
+    function getMemberTransactions() external view returns(memberTransaction[] memory memberTxs) {
+        memberTxs = memberTransactions[msg.sender];
+    }
+
+
+    // fetch admin role for frontend op
+    function getAdminRole(address _userAddress) external view returns(string memory userRole) {
+        userRole = walletAdmin[_userAddress].role;
+
     }
 
 
