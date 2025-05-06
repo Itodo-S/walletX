@@ -10,6 +10,7 @@ import {
   IconSun,
   IconMoon,
 } from "@tabler/icons-react";
+import { useAppKitAccount } from "@reown/appkit/react"; // Import to get connected wallet info
 
 const navItems = [
   { name: "Dashboard", icon: <IconHome size={20} />, href: "/dashboard" },
@@ -38,6 +39,7 @@ const navItems = [
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { address: connectedWalletAddress } = useAppKitAccount(); // Get connected wallet address
 
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("theme") === "dark"
@@ -55,14 +57,12 @@ const DashboardLayout = () => {
     }
   }, [isDarkMode]);
 
-  // Example address - replace this with real wallet connection logic
   useEffect(() => {
-    const fetchWallet = async () => {
-      const fakeAddress = "0x1234...ABCD";
-      setWalletAddress(fakeAddress);
-    };
-    fetchWallet();
-  }, []);
+    if (connectedWalletAddress) {
+      const formattedAddress = `${connectedWalletAddress.slice(0, 6)}...${connectedWalletAddress.slice(-4)}`;
+      setWalletAddress(formattedAddress);
+    }
+  }, [connectedWalletAddress]);
 
   return (
     <div className="flex h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
@@ -103,7 +103,7 @@ const DashboardLayout = () => {
           <div className="text-sm text-[hsl(var(--muted-text))]">
             Connected:{" "}
             <span className="text-[hsl(var(--foreground))] font-medium">
-              {walletAddress}
+              {walletAddress || "Not Connected"}
             </span>
           </div>
           <button

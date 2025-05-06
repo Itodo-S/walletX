@@ -1,46 +1,51 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { IconUserDollar } from "@tabler/icons-react";
+import { IconUserDollar, IconLoader2, IconLoader } from "@tabler/icons-react";
 import useContract from "../../hooks/useContract";
-
-const members = [
-  { id: "john123", name: "John Doe" },
-  { id: "jane456", name: "Jane Smith" },
-  { id: "alex789", name: "Alex Johnson" },
-];
+import useReimburseMember from "../../hooks/useReimburseMember";
 
 const ReimburseMember = () => {
   const [selectedMember, setSelectedMember] = useState("");
   const [amount, setAmount] = useState("");
-
-  // const handleReimburse = () => {
-  //   console.log("Reimbursing member:", selectedMember, "Amount:", amount);
-  //   // Call reimburseMember(selectedMember, amount);
-  // };
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const readOnlyOnboardContract = useContract(true);
+  const reimburseMember = useReimburseMember();
   const [members, setMembers] = useState([]);
 
   const fetchMembers = useCallback(async () => {
-    if(!readOnlyOnboardContract) return;
-    console.log("provider: ", readOnlyOnboardContract.runner);
+    if (!readOnlyOnboardContract) return;
 
     try {
       const data = await readOnlyOnboardContract.getMembers();
       const result = await data.toArray();
-      setMembers(result);
 
-      console.log("members", members)
-      console.log([...data][0].memberAddress);
-      
+      const parsedMembers = result.map((member) => ({
+        id: member[0],
+        name: member[2],
+      }));
 
+      setMembers(parsedMembers);
     } catch (error) {
-      console.log("error fetching employees: ", error);
+      console.log("Error fetching members: ", error);
     }
   }, [readOnlyOnboardContract]);
 
   useEffect(() => {
     fetchMembers();
   }, [fetchMembers]);
+
+  const handleReimburse = async () => {
+    if (!selectedMember || !amount) return;
+
+    setIsProcessing(true);
+    try {
+      await reimburseMember(selectedMember, amount);
+    } catch (error) {
+      console.error("Error during reimbursement: ", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="max-w-xl mx-auto mt-10 bg-[hsl(var(--card))] p-8 rounded-xl border border-[hsl(var(--border))] shadow-md">
@@ -95,13 +100,14 @@ const ReimburseMember = () => {
 
         {/* Reimburse Button */}
         <div className="pt-4">
-          {/* <button
+          <button
+            className="border border-[hsl(var(--primary))] text-[hsl(var(--primary))] px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.05)] transition disabled:opacity-50 flex items-center gap-2"
             onClick={handleReimburse}
-            className="bg-[hsl(var(--primary))] text-white px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.9)] transition"
-            disabled={!selectedMember || !amount}
+            disabled={!selectedMember || !amount || isProcessing}
           >
-            Reimburse
-          </button> */}
+            {isProcessing && <IconLoader size={18} className="animate-spin" />}
+            {isProcessing ? "Processing..." : "Reimburse"}
+          </button>
         </div>
       </div>
     </div>
