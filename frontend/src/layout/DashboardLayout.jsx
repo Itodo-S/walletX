@@ -11,6 +11,7 @@ import {
   IconMoon,
 } from "@tabler/icons-react";
 import { useAppKitAccount } from "@reown/appkit/react"; // Import to get connected wallet info
+import useAdminRole from "../hooks/useAdminRole"; // Import the custom hook
 
 const navItems = [
   { name: "Dashboard", icon: <IconHome size={20} />, href: "/dashboard" },
@@ -46,6 +47,8 @@ const DashboardLayout = () => {
   );
   const [walletAddress, setWalletAddress] = useState("");
 
+  const { adminRole, loading, error } = useAdminRole(connectedWalletAddress); // Use the hook
+
   useEffect(() => {
     const root = document.documentElement;
     if (isDarkMode) {
@@ -63,6 +66,15 @@ const DashboardLayout = () => {
       setWalletAddress(formattedAddress);
     }
   }, [connectedWalletAddress]);
+
+  useEffect(() => {
+    if (!loading && adminRole) {
+      console.log("Admin Role:", adminRole);
+    }
+    if (error) {
+      console.error("Error fetching admin role:", error);
+    }
+  }, [adminRole, loading, error]);
 
   return (
     <div className="flex h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
