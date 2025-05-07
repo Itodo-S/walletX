@@ -2,10 +2,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import useContract from "../../hooks/useContract";
 import { useAppKitAccount } from "@reown/appkit/react";
+import useAdminRole from "../../hooks/useAdminRole";
 
-const Dashboard = ({ adminRole }) => {
+const Dashboard = () => {
   const { address: connectedWalletAddress } = useAppKitAccount();
-  const userRole = adminRole || "member"; // Use adminRole to determine the role
+  const { adminRole } = useAdminRole(connectedWalletAddress);
+  console.log("Admin Role: ", adminRole);
+
+  const userRole = adminRole || "member";
   const [members, setMembers] = useState([]);
   const [memberInfo, setMemberInfo] = useState(null);
   const [walletInfo, setWalletInfo] = useState({
@@ -14,7 +18,7 @@ const Dashboard = ({ adminRole }) => {
     organizationName: "",
     memberSpendLimit: "",
   });
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   const readOnlyOnboardContract = useContract(true);
 
@@ -64,7 +68,7 @@ const Dashboard = ({ adminRole }) => {
         firstName: info[1],
         lastName: info[2],
         isActive: info[3],
-        spendLimit: info[4], // BigInt
+        spendLimit: info[4],
         role: info[6],
       };
 
@@ -77,7 +81,7 @@ const Dashboard = ({ adminRole }) => {
   useEffect(() => {
     const loadData = async () => {
       await Promise.all([fetchMembers(), fetchWalletInfo(), fetchMemberInfo()]);
-      setLoading(false); // Set loading to false after data is fetched
+      setLoading(false);
     };
     loadData();
   }, [fetchMembers, fetchWalletInfo, fetchMemberInfo]);
@@ -85,18 +89,36 @@ const Dashboard = ({ adminRole }) => {
   if (loading) {
     return (
       <div className="space-y-10 max-w-7xl mx-auto">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-300 rounded w-1/3"></div>
+        <div className="space-y-4">
+          <div className="h-8 bg-gray-300 rounded w-1/3 animate-pulse"></div>
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            <div className="h-24 bg-gray-300 rounded"></div>
-            <div className="h-24 bg-gray-300 rounded"></div>
-            <div className="h-24 bg-gray-300 rounded"></div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
           </div>
-          <div className="h-8 bg-gray-300 rounded w-1/4"></div>
+          <div className="h-8 bg-gray-300 rounded w-1/4 animate-pulse"></div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <div className="h-24 bg-gray-300 rounded"></div>
-            <div className="h-24 bg-gray-300 rounded"></div>
-            <div className="h-24 bg-gray-300 rounded"></div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -107,7 +129,10 @@ const Dashboard = ({ adminRole }) => {
     <div className="space-y-10 max-w-7xl mx-auto">
       {/* Welcome Section */}
       <h2 className="text-2xl font-semibold text-[hsl(var(--foreground))]">
-        Welcome, {userRole === "admin" ? "Admin" : `${memberInfo?.firstName || "Member"}`}
+        Welcome,{" "}
+        {userRole === "admin"
+          ? "Admin"
+          : `${memberInfo?.firstName || "Member"}`}
       </h2>
 
       {/* Info Cards */}
@@ -122,7 +147,10 @@ const Dashboard = ({ adminRole }) => {
             <Card title="Wallet Address" colSpanFull>
               <span className="text-sm font-mono">
                 {connectedWalletAddress
-                  ? `${connectedWalletAddress.slice(0, 6)}...${connectedWalletAddress.slice(-4)}`
+                  ? `${connectedWalletAddress.slice(
+                      0,
+                      6
+                    )}...${connectedWalletAddress.slice(-4)}`
                   : "Not Connected"}
               </span>
             </Card>
@@ -140,7 +168,10 @@ const Dashboard = ({ adminRole }) => {
             <Card title="Wallet Address" colSpanFull>
               <span className="text-sm font-mono">
                 {memberInfo?.address
-                  ? `${memberInfo.address.slice(0, 6)}...${memberInfo.address.slice(-4)}`
+                  ? `${memberInfo.address.slice(
+                      0,
+                      6
+                    )}...${memberInfo.address.slice(-4)}`
                   : "Not Connected"}
               </span>
             </Card>
