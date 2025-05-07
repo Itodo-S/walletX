@@ -7,6 +7,7 @@ const Dashboard = () => {
   const { address: connectedWalletAddress } = useAppKitAccount();
   const userRole = connectedWalletAddress ? "admin" : "member";
   const [members, setMembers] = useState([]);
+  const [memberInfo, setMemberInfo] = useState(null);
   const [walletInfo, setWalletInfo] = useState({
     walletName: "",
     walletBalance: "",
@@ -14,8 +15,6 @@ const Dashboard = () => {
     memberSpendLimit: "",
   });
 
-  console.log(walletInfo);
-  
   const readOnlyOnboardContract = useContract(true);
 
   const fetchMembers = useCallback(async () => {
@@ -31,7 +30,7 @@ const Dashboard = () => {
       }));
 
       console.log("result:", result);
-      
+
       setMembers(parsedMembers);
     } catch (error) {
       console.log("Error fetching members: ", error);
@@ -55,10 +54,34 @@ const Dashboard = () => {
     }
   }, [readOnlyOnboardContract]);
 
+  const fetchMemberInfo = useCallback(async () => {
+    if (!readOnlyOnboardContract) return;
+  
+    try {
+      const info = await readOnlyOnboardContract.getMember();
+      console.log("Member Info:", info);
+  
+      const parsedInfo = {
+        address: info[0],
+        firstName: info[1],
+        lastName: info[2],
+        isActive: info[3],
+        spendLimit: info[4], // BigInt
+        role: info[6],
+      };
+  
+      setMemberInfo(parsedInfo);
+    } catch (error) {
+      console.log("Error fetching member info: ", error);
+    }
+  }, [readOnlyOnboardContract]);
+  
+
   useEffect(() => {
     fetchMembers();
     fetchWalletInfo();
-  }, [fetchMembers, fetchWalletInfo]);
+    fetchMemberInfo(); // Fetch and log member info
+  }, [fetchMembers, fetchWalletInfo, fetchMemberInfo]);
 
   return (
     <div className="space-y-10 max-w-7xl mx-auto">
@@ -68,37 +91,40 @@ const Dashboard = () => {
       </h2>
 
       {/* Info Cards */}
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          <Card
-            title={userRole === "admin" ? "Wallet Name" : "Organization Name"}
-          >
-            {userRole === "admin"
-          ? walletInfo.walletName
-          : walletInfo.organizationName}
-          </Card>
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <Card
+          title={userRole === "admin" ? "Wallet Name" : "Organization Name"}
+        >
+          {userRole === "admin"
+            ? walletInfo.walletName
+            : walletInfo.organizationName}
+        </Card>
 
-          <Card
-            title={userRole === "admin" ? "Wallet Balance" : "Your Spend Limit"}
-          >
-            {userRole === "admin"
-          ? walletInfo.walletBalance
-          : walletInfo.memberSpendLimit}
-          </Card>
+        <Card
+          title={userRole === "admin" ? "Wallet Balance" : "Your Spend Limit"}
+        >
+          {userRole === "admin"
+            ? walletInfo.walletBalance
+            : walletInfo.memberSpendLimit}
+        </Card>
 
-          <Card title="Role" className="capitalize">
-            {userRole}
-          </Card>
+        <Card title="Role" className="capitalize">
+          {userRole}
+        </Card>
 
-          <Card title="Wallet Address" colSpanFull>
-            <span className="text-sm font-mono">
-          {connectedWalletAddress
-            ? `${connectedWalletAddress.slice(0, 6)}...${connectedWalletAddress.slice(-4)}`
-            : "Not Connected"}
-            </span>
-          </Card>
-        </div>
+        <Card title="Wallet Address" colSpanFull>
+          <span className="text-sm font-mono">
+            {connectedWalletAddress
+              ? `${connectedWalletAddress.slice(
+                  0,
+                  6
+                )}...${connectedWalletAddress.slice(-4)}`
+              : "Not Connected"}
+          </span>
+        </Card>
+      </div>
 
-        {/* Member List */}
+      {/* Member List */}
       {userRole === "admin" && (
         <section>
           <h3 className="text-xl font-semibold mb-4 text-[hsl(var(--foreground))]">

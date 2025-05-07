@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import logo from "../../assets/logo.png";
-import { IconSun, IconMoon } from "@tabler/icons-react"; // Ensure this path is correct
+import { IconSun, IconMoon } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { NavLink } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAppKitAccount } from "@reown/appkit/react"; 
 
 const XWalletHeader = () => {
+  const { address: connectedWalletAddress } = useAppKitAccount();
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
@@ -16,6 +18,14 @@ const XWalletHeader = () => {
       document.documentElement.classList.remove("dark");
     }
   }, [darkMode]);
+
+  const handleWalletNavigation = (e) => {
+    if (!connectedWalletAddress) {
+      e.preventDefault(); // Prevent navigation
+      toast.error("Please connect your wallet!");
+    }
+  };
+
   return (
     <header className="w-full py-2 px-4 md:px-8 shadow-sm bg-primay dark:bg-card">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -41,6 +51,7 @@ const XWalletHeader = () => {
           </NavLink>
           <NavLink
             to="/dashboard"
+            onClick={handleWalletNavigation} 
             className={({ isActive }) =>
               `font-semibold ${
                 isActive ? "text-primary" : "hover:text-primary"

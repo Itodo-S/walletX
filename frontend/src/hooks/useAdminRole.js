@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import useTokenContract from "./useTokenContract";
+import useContract from "./useContract";
 
 const useAdminRole = (userAddress) => {
     const [adminRole, setAdminRole] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const contract = useTokenContract();
+    const contract = useContract(true); // Use contract with signer
 
     useEffect(() => {
         if (!contract || !userAddress) return;
