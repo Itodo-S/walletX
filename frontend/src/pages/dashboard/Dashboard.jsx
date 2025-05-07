@@ -3,9 +3,9 @@ import "react-toastify/dist/ReactToastify.css";
 import useContract from "../../hooks/useContract";
 import { useAppKitAccount } from "@reown/appkit/react";
 
-const Dashboard = () => {
+const Dashboard = ({ adminRole }) => {
   const { address: connectedWalletAddress } = useAppKitAccount();
-  const userRole = connectedWalletAddress ? "admin" : "member";
+  const userRole = adminRole || "member"; // Use adminRole to determine the role
   const [members, setMembers] = useState([]);
   const [memberInfo, setMemberInfo] = useState(null);
   const [walletInfo, setWalletInfo] = useState({
@@ -14,6 +14,7 @@ const Dashboard = () => {
     organizationName: "",
     memberSpendLimit: "",
   });
+  const [loading, setLoading] = useState(true); // Add loading state
 
   const readOnlyOnboardContract = useContract(true);
 
@@ -28,8 +29,6 @@ const Dashboard = () => {
         id: member[0],
         name: member[2],
       }));
-
-      console.log("result:", result);
 
       setMembers(parsedMembers);
     } catch (error) {
@@ -56,11 +55,10 @@ const Dashboard = () => {
 
   const fetchMemberInfo = useCallback(async () => {
     if (!readOnlyOnboardContract) return;
-  
+
     try {
       const info = await readOnlyOnboardContract.getMember();
-      console.log("Member Info:", info);
-  
+
       const parsedInfo = {
         address: info[0],
         firstName: info[1],
@@ -69,59 +67,85 @@ const Dashboard = () => {
         spendLimit: info[4], // BigInt
         role: info[6],
       };
-  
+
       setMemberInfo(parsedInfo);
     } catch (error) {
       console.log("Error fetching member info: ", error);
     }
   }, [readOnlyOnboardContract]);
-  
 
   useEffect(() => {
-    fetchMembers();
-    fetchWalletInfo();
-    fetchMemberInfo(); // Fetch and log member info
+    const loadData = async () => {
+      await Promise.all([fetchMembers(), fetchWalletInfo(), fetchMemberInfo()]);
+      setLoading(false); // Set loading to false after data is fetched
+    };
+    loadData();
   }, [fetchMembers, fetchWalletInfo, fetchMemberInfo]);
+
+  if (loading) {
+    return (
+      <div className="space-y-10 max-w-7xl mx-auto">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-300 rounded w-1/3"></div>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className="h-24 bg-gray-300 rounded"></div>
+            <div className="h-24 bg-gray-300 rounded"></div>
+            <div className="h-24 bg-gray-300 rounded"></div>
+          </div>
+          <div className="h-8 bg-gray-300 rounded w-1/4"></div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="h-24 bg-gray-300 rounded"></div>
+            <div className="h-24 bg-gray-300 rounded"></div>
+            <div className="h-24 bg-gray-300 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-10 max-w-7xl mx-auto">
       {/* Welcome Section */}
       <h2 className="text-2xl font-semibold text-[hsl(var(--foreground))]">
-        Welcome, {userRole === "admin" ? "Admin" : "Member"}
+        Welcome, {userRole === "admin" ? "Admin" : `${memberInfo?.firstName || "Member"}`}
       </h2>
 
       {/* Info Cards */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <Card
-          title={userRole === "admin" ? "Wallet Name" : "Organization Name"}
-        >
-          {userRole === "admin"
-            ? walletInfo.walletName
-            : walletInfo.organizationName}
-        </Card>
-
-        <Card
-          title={userRole === "admin" ? "Wallet Balance" : "Your Spend Limit"}
-        >
-          {userRole === "admin"
-            ? walletInfo.walletBalance
-            : walletInfo.memberSpendLimit}
-        </Card>
-
-        <Card title="Role" className="capitalize">
-          {userRole}
-        </Card>
-
-        <Card title="Wallet Address" colSpanFull>
-          <span className="text-sm font-mono">
-            {connectedWalletAddress
-              ? `${connectedWalletAddress.slice(
-                  0,
-                  6
-                )}...${connectedWalletAddress.slice(-4)}`
-              : "Not Connected"}
-          </span>
-        </Card>
+        {userRole === "admin" ? (
+          <>
+            <Card title="Wallet Name">{walletInfo.walletName}</Card>
+            <Card title="Wallet Balance">{walletInfo.walletBalance}</Card>
+            <Card title="Role" className="capitalize">
+              {userRole}
+            </Card>
+            <Card title="Wallet Address" colSpanFull>
+              <span className="text-sm font-mono">
+                {connectedWalletAddress
+                  ? `${connectedWalletAddress.slice(0, 6)}...${connectedWalletAddress.slice(-4)}`
+                  : "Not Connected"}
+              </span>
+            </Card>
+          </>
+        ) : (
+          <>
+            <Card title="First Name">{memberInfo?.firstName || "N/A"}</Card>
+            <Card title="Last Name">{memberInfo?.lastName || "N/A"}</Card>
+            <Card title="Spend Limit">
+              {memberInfo?.spendLimit ? `${memberInfo.spendLimit} ETH` : "N/A"}
+            </Card>
+            <Card title="Role" className="capitalize">
+              {memberInfo?.role || "N/A"}
+            </Card>
+            <Card title="Wallet Address" colSpanFull>
+              <span className="text-sm font-mono">
+                {memberInfo?.address
+                  ? `${memberInfo.address.slice(0, 6)}...${memberInfo.address.slice(-4)}`
+                  : "Not Connected"}
+              </span>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Member List */}
