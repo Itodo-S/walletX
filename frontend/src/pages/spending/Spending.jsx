@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useMemberWithdrawal from "../../hooks/useMemberWithdrawal";
+import useGetMemberTransactions from "../../hooks/useGetMemberTransactions";
 import { IconLoader } from "@tabler/icons-react";
 
 const Spending = () => {
@@ -7,6 +8,7 @@ const Spending = () => {
   const [receiver, setReceiver] = useState("");
   const [loading, setLoading] = useState(false);
   const memberWithdrawal = useMemberWithdrawal();
+  const { transactions, fetchMemberTransactions } = useGetMemberTransactions();
 
   const handleWithdraw = async (e) => {
     e.preventDefault();
@@ -24,6 +26,15 @@ const Spending = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      await fetchMemberTransactions();
+      console.log("Member Transactions:", transactions);
+    };
+
+    fetchTransactions();
+  }, [fetchMemberTransactions]);
 
   return (
     <div className="max-w-xl mx-auto bg-[hsl(var(--card))] border border-[hsl(var(--border))] p-8 rounded-2xl shadow-md">

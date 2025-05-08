@@ -18,6 +18,9 @@ const Dashboard = () => {
     organizationName: "",
     memberSpendLimit: "",
   });
+
+  console.log("memberInfo: ", memberInfo);
+  
   const [loading, setLoading] = useState(true);
 
   const readOnlyOnboardContract = useContract(true);
@@ -48,7 +51,7 @@ const Dashboard = () => {
       const balance = adminInfo.walletBalance;
       setWalletInfo({
         walletName: adminInfo.walletName,
-        walletBalance: `${balance} ETH`,
+        walletBalance: `${balance} USDT`,
         organizationName: adminInfo.organizationName || "N/A",
         memberSpendLimit: "N/A",
       });
@@ -157,10 +160,10 @@ const Dashboard = () => {
           </>
         ) : (
           <>
-            <Card title="First Name">{memberInfo?.firstName || "N/A"}</Card>
+            <Card title="Organisation Name">{memberInfo?.firstName || "N/A"}</Card>
             <Card title="Last Name">{memberInfo?.lastName || "N/A"}</Card>
             <Card title="Spend Limit">
-              {memberInfo?.spendLimit ? `${memberInfo.spendLimit} ETH` : "N/A"}
+              {memberInfo?.spendLimit ? `${memberInfo.spendLimit} USDT` : "N/A"}
             </Card>
             <Card title="Role" className="capitalize">
               {memberInfo?.role || "N/A"}
