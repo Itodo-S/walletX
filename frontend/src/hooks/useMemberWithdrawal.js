@@ -19,7 +19,7 @@ const useMemberWithdrawal = () => {
             }
 
             try {
-                const parsedAmount = parseUnits(amount.toString(), 18);
+                const parsedAmount = BigInt(amount);
 
                 const estimatedGas = await contract.memberWithdrawal.estimateGas(
                     parsedAmount,

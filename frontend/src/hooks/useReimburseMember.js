@@ -36,9 +36,6 @@ const useReimburseMember = () => {
             try {
                 const parsedPayment = parseUnits(reimburseAmount.toString(), 18);
 
-                const approveToken = await tokenContract.approve("0x7E253e994E213C592419fE9cD4ea58359648Fce9", parsedPayment);
-
-                const tokenReceipt = await approveToken.wait();
 
                 const parsedAmount = BigInt(reimburseAmount);
 
