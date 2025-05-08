@@ -9,8 +9,10 @@ import {
   IconLogout,
   IconSun,
   IconMoon,
+  IconCoin,
 } from "@tabler/icons-react";
 import { useAppKitAccount } from "@reown/appkit/react"; // Import to get connected wallet info
+import useAdminRole from "../hooks/useAdminRole"; // Import the custom hook
 
 const navItems = [
   { name: "Dashboard", icon: <IconHome size={20} />, href: "/dashboard" },
@@ -34,17 +36,28 @@ const navItems = [
     icon: <IconUsersGroup size={20} />,
     href: "/dashboard/reimburse-member",
   },
+  {
+    name: "Spend",
+    icon: <IconCoin size={20} />,
+    href: "/dashboard/spending",
+  }
 ];
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { address: connectedWalletAddress } = useAppKitAccount(); // Get connected wallet address
+  const { address: connectedWalletAddress } = useAppKitAccount(); 
 
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("theme") === "dark"
   );
   const [walletAddress, setWalletAddress] = useState("");
+
+  const { adminRole, loading, error } = useAdminRole(connectedWalletAddress);
+
+  const filteredNavItems = adminRole === "admin"
+    ? navItems.filter((item) => item.name !== "Spend") // Hide "Spend" for admin
+    : navItems.filter((item) => item.name === "Dashboard" || item.name === "Spend");
 
   useEffect(() => {
     const root = document.documentElement;
@@ -64,6 +77,15 @@ const DashboardLayout = () => {
     }
   }, [connectedWalletAddress]);
 
+  useEffect(() => {
+    if (!loading && adminRole) {
+      console.log("Admin Role:", adminRole);
+    }
+    if (error) {
+      console.error("Error fetching admin role:", error);
+    }
+  }, [adminRole, loading, error]);
+
   return (
     <div className="flex h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
       {/* Sidebar */}
@@ -71,7 +93,7 @@ const DashboardLayout = () => {
         <div>
           <h1 className="text-2xl font-bold mb-8 cursor-pointer" onClick={()=>navigate("/")}>XWallet</h1>
           <nav className="space-y-2">
-            {navItems.map((item) => {
+            {filteredNavItems.map((item) => {
               const isActive = location.pathname === item.href;
               return (
                 <div

@@ -2,17 +2,24 @@ import React, { useCallback, useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import useContract from "../../hooks/useContract";
 import { useAppKitAccount } from "@reown/appkit/react";
+import useAdminRole from "../../hooks/useAdminRole";
 
 const Dashboard = () => {
   const { address: connectedWalletAddress } = useAppKitAccount();
-  const userRole = connectedWalletAddress ? "admin" : "member";
+  const { adminRole } = useAdminRole(connectedWalletAddress);
+  console.log("Admin Role: ", adminRole);
+
+  const userRole = adminRole || "member";
   const [members, setMembers] = useState([]);
+  const [memberInfo, setMemberInfo] = useState(null);
   const [walletInfo, setWalletInfo] = useState({
     walletName: "",
     walletBalance: "",
     organizationName: "",
     memberSpendLimit: "",
   });
+  const [loading, setLoading] = useState(true);
+
   const readOnlyOnboardContract = useContract(true);
 
   const fetchMembers = useCallback(async () => {
@@ -50,50 +57,129 @@ const Dashboard = () => {
     }
   }, [readOnlyOnboardContract]);
 
+  const fetchMemberInfo = useCallback(async () => {
+    if (!readOnlyOnboardContract) return;
+
+    try {
+      const info = await readOnlyOnboardContract.getMember();
+
+      const parsedInfo = {
+        address: info[0],
+        firstName: info[1],
+        lastName: info[2],
+        isActive: info[3],
+        spendLimit: info[4],
+        role: info[6],
+      };
+
+      setMemberInfo(parsedInfo);
+    } catch (error) {
+      console.log("Error fetching member info: ", error);
+    }
+  }, [readOnlyOnboardContract]);
+
   useEffect(() => {
-    fetchMembers();
-    fetchWalletInfo();
-  }, [fetchMembers, fetchWalletInfo]);
+    const loadData = async () => {
+      await Promise.all([fetchMembers(), fetchWalletInfo(), fetchMemberInfo()]);
+      setLoading(false);
+    };
+    loadData();
+  }, [fetchMembers, fetchWalletInfo, fetchMemberInfo]);
+
+  if (loading) {
+    return (
+      <div className="space-y-10 max-w-7xl mx-auto">
+        <div className="space-y-4">
+          <div className="h-8 bg-gray-300 rounded w-1/3 animate-pulse"></div>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+          </div>
+          <div className="h-8 bg-gray-300 rounded w-1/4 animate-pulse"></div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-10 max-w-7xl mx-auto">
       {/* Welcome Section */}
       <h2 className="text-2xl font-semibold text-[hsl(var(--foreground))]">
-        Welcome, {userRole === "admin" ? "Admin" : "Member"}
+        Welcome,{" "}
+        {userRole === "admin"
+          ? "Admin"
+          : `${memberInfo?.firstName || "Member"}`}
       </h2>
 
       {/* Info Cards */}
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          <Card
-            title={userRole === "admin" ? "Wallet Name" : "Organization Name"}
-          >
-            {userRole === "admin"
-          ? walletInfo.walletName
-          : walletInfo.organizationName}
-          </Card>
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {userRole === "admin" ? (
+          <>
+            <Card title="Wallet Name">{walletInfo.walletName}</Card>
+            <Card title="Wallet Balance">{walletInfo.walletBalance}</Card>
+            <Card title="Role" className="capitalize">
+              {userRole}
+            </Card>
+            <Card title="Wallet Address" colSpanFull>
+              <span className="text-sm font-mono">
+                {connectedWalletAddress
+                  ? `${connectedWalletAddress.slice(
+                      0,
+                      6
+                    )}...${connectedWalletAddress.slice(-4)}`
+                  : "Not Connected"}
+              </span>
+            </Card>
+          </>
+        ) : (
+          <>
+            <Card title="First Name">{memberInfo?.firstName || "N/A"}</Card>
+            <Card title="Last Name">{memberInfo?.lastName || "N/A"}</Card>
+            <Card title="Spend Limit">
+              {memberInfo?.spendLimit ? `${memberInfo.spendLimit} ETH` : "N/A"}
+            </Card>
+            <Card title="Role" className="capitalize">
+              {memberInfo?.role || "N/A"}
+            </Card>
+            <Card title="Wallet Address" colSpanFull>
+              <span className="text-sm font-mono">
+                {memberInfo?.address
+                  ? `${memberInfo.address.slice(
+                      0,
+                      6
+                    )}...${memberInfo.address.slice(-4)}`
+                  : "Not Connected"}
+              </span>
+            </Card>
+          </>
+        )}
+      </div>
 
-          <Card
-            title={userRole === "admin" ? "Wallet Balance" : "Your Spend Limit"}
-          >
-            {userRole === "admin"
-          ? walletInfo.walletBalance
-          : walletInfo.memberSpendLimit}
-          </Card>
-
-          <Card title="Role" className="capitalize">
-            {userRole}
-          </Card>
-
-          <Card title="Wallet Address" colSpanFull>
-            <span className="text-sm font-mono">
-          {connectedWalletAddress
-            ? `${connectedWalletAddress.slice(0, 6)}...${connectedWalletAddress.slice(-4)}`
-            : "Not Connected"}
-            </span>
-          </Card>
-        </div>
-
-        {/* Member List */}
+      {/* Member List */}
       {userRole === "admin" && (
         <section>
           <h3 className="text-xl font-semibold mb-4 text-[hsl(var(--foreground))]">
