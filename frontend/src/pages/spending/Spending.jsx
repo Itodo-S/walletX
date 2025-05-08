@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import useMemberWithdrawal from "../../hooks/useMemberWithdrawal";
 import useGetMemberTransactions from "../../hooks/useGetMemberTransactions";
 import { IconLoader } from "@tabler/icons-react";
+import { useAppKitAccount } from "@reown/appkit/react";
 
 const Spending = () => {
   const [amount, setAmount] = useState("");
@@ -9,6 +10,7 @@ const Spending = () => {
   const [loading, setLoading] = useState(false);
   const memberWithdrawal = useMemberWithdrawal();
   const { transactions, fetchMemberTransactions } = useGetMemberTransactions();
+  const { address } = useAppKitAccount();
 
   const handleWithdraw = async (e) => {
     e.preventDefault();
@@ -29,12 +31,16 @@ const Spending = () => {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      await fetchMemberTransactions();
-      console.log("Member Transactions:", transactions);
+      if (address) {
+        const response = await fetchMemberTransactions(address);
+        console.log("Member Transactions Response:", response);
+      } else {
+        console.error("No connected address found.");
+      }
     };
 
     fetchTransactions();
-  }, [fetchMemberTransactions]);
+  }, [address]);
 
   return (
     <div className="max-w-xl mx-auto bg-[hsl(var(--card))] border border-[hsl(var(--border))] p-8 rounded-2xl shadow-md">

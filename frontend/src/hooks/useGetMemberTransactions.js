@@ -6,14 +6,19 @@ const useGetMemberTransactions = () => {
     const contract = useContract();
     const [transactions, setTransactions] = useState([]);
 
-    const fetchMemberTransactions = useCallback(async () => {
+    const fetchMemberTransactions = useCallback(async (memberAddress) => {
         if (!contract) {
             toast.error("Contract not initialized!");
             return;
         }
 
+        if (!memberAddress) {
+            toast.error("Member address is required!");
+            return;
+        }
+
         try {
-            const memberTransactions = await contract.getMemberTransactions();
+            const memberTransactions = await contract.getMemberTransactions(memberAddress);
             setTransactions(memberTransactions);
         } catch (error) {
             console.error("Error fetching member transactions:", error);

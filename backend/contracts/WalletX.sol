@@ -164,8 +164,8 @@ contract WalletX {
         admin = walletAdmin[msg.sender];
     }
 
-    function getMemberTransactions() external view returns(memberTransaction[] memory memberTxs) {
-        memberTxs = memberTransactions[msg.sender];
+    function getMemberTransactions(address _memberAddress) external view returns(memberTransaction[] memory memberTxs) {
+        memberTxs = memberTransactions[_memberAddress];
     }
 
 
