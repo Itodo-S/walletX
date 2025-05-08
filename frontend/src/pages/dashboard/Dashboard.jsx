@@ -7,7 +7,7 @@ import useAdminRole from "../../hooks/useAdminRole";
 const Dashboard = () => {
   const { address: connectedWalletAddress } = useAppKitAccount();
   const { adminRole } = useAdminRole(connectedWalletAddress);
-  console.log("Admin Role: ", adminRole);
+  // console.log("Admin Role: ", adminRole);
 
   const userRole = adminRole || "member";
   const [members, setMembers] = useState([]);
@@ -19,7 +19,9 @@ const Dashboard = () => {
     memberSpendLimit: "",
   });
 
-  console.log("memberInfo: ", memberInfo);
+  // console.log(members);
+  
+  // console.log("memberInfo: ", memberInfo);
   
   const [loading, setLoading] = useState(true);
 
@@ -32,9 +34,13 @@ const Dashboard = () => {
       const data = await readOnlyOnboardContract.getMembers();
       const result = await data.toArray();
 
+      // console.log("Members Data: ", result);
+      
+
       const parsedMembers = result.map((member) => ({
         id: member[0],
         name: member[2],
+        spendLimit: member[4],
       }));
 
       setMembers(parsedMembers);
@@ -161,7 +167,7 @@ const Dashboard = () => {
         ) : (
           <>
             <Card title="Organisation Name">{memberInfo?.firstName || "N/A"}</Card>
-            <Card title="Last Name">{memberInfo?.lastName || "N/A"}</Card>
+            <Card title="Name">{memberInfo?.lastName || "N/A"}</Card>
             <Card title="Spend Limit">
               {memberInfo?.spendLimit ? `${memberInfo.spendLimit} USDT` : "N/A"}
             </Card>
@@ -204,6 +210,9 @@ const Dashboard = () => {
                 </h4>
                 <p className="text-sm text-[hsl(var(--muted-text))] mb-1">
                   Role: Member
+                </p>
+                <p className="text-sm text-[hsl(var(--muted-text))] mb-1">
+                  Spend Limit: {member.spendLimit ? `${member.spendLimit} USDT` : "N/A"}
                 </p>
                 <p className="text-sm text-[hsl(var(--muted-text))] break-words">
                   Wallet: {`${member.id.slice(0, 6)}...${member.id.slice(-4)}`}
