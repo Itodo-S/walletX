@@ -7,7 +7,7 @@ import useAdminRole from "../../hooks/useAdminRole";
 const Dashboard = () => {
   const { address: connectedWalletAddress } = useAppKitAccount();
   const { adminRole } = useAdminRole(connectedWalletAddress);
-  console.log("Admin Role: ", adminRole);
+  // console.log("Admin Role: ", adminRole);
 
   const userRole = adminRole || "member";
   const [members, setMembers] = useState([]);
@@ -18,6 +18,11 @@ const Dashboard = () => {
     organizationName: "",
     memberSpendLimit: "",
   });
+
+  // console.log(members);
+  
+  // console.log("memberInfo: ", memberInfo);
+  
   const [loading, setLoading] = useState(true);
 
   const readOnlyOnboardContract = useContract(true);
@@ -29,9 +34,13 @@ const Dashboard = () => {
       const data = await readOnlyOnboardContract.getMembers();
       const result = await data.toArray();
 
+      // console.log("Members Data: ", result);
+      
+
       const parsedMembers = result.map((member) => ({
         id: member[0],
         name: member[2],
+        spendLimit: member[4],
       }));
 
       setMembers(parsedMembers);
@@ -48,7 +57,7 @@ const Dashboard = () => {
       const balance = adminInfo.walletBalance;
       setWalletInfo({
         walletName: adminInfo.walletName,
-        walletBalance: `${balance} ETH`,
+        walletBalance: `${balance} USDT`,
         organizationName: adminInfo.organizationName || "N/A",
         memberSpendLimit: "N/A",
       });
@@ -137,7 +146,7 @@ const Dashboard = () => {
 
       {/* Info Cards */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {userRole === "admin" ? (
+        {userRole === "admin" || memberInfo?.role === "" ? (
           <>
             <Card title="Wallet Name">{walletInfo.walletName}</Card>
             <Card title="Wallet Balance">{walletInfo.walletBalance}</Card>
@@ -157,10 +166,10 @@ const Dashboard = () => {
           </>
         ) : (
           <>
-            <Card title="First Name">{memberInfo?.firstName || "N/A"}</Card>
-            <Card title="Last Name">{memberInfo?.lastName || "N/A"}</Card>
+            <Card title="Organisation Name">{memberInfo?.firstName || "N/A"}</Card>
+            <Card title="Name">{memberInfo?.lastName || "N/A"}</Card>
             <Card title="Spend Limit">
-              {memberInfo?.spendLimit ? `${memberInfo.spendLimit} ETH` : "N/A"}
+              {memberInfo?.spendLimit ? `${memberInfo.spendLimit} USDT` : "N/A"}
             </Card>
             <Card title="Role" className="capitalize">
               {memberInfo?.role || "N/A"}
@@ -201,6 +210,9 @@ const Dashboard = () => {
                 </h4>
                 <p className="text-sm text-[hsl(var(--muted-text))] mb-1">
                   Role: Member
+                </p>
+                <p className="text-sm text-[hsl(var(--muted-text))] mb-1">
+                  Spend Limit: {member.spendLimit ? `${member.spendLimit} USDT` : "N/A"}
                 </p>
                 <p className="text-sm text-[hsl(var(--muted-text))] break-words">
                   Wallet: {`${member.id.slice(0, 6)}...${member.id.slice(-4)}`}
