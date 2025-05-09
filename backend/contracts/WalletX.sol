@@ -28,6 +28,7 @@ contract WalletX {
 
     struct WalletMember {
         address memberAddress;
+        address adminAddress;
         string organizationName;
         string name;
         bool active;
@@ -90,6 +91,7 @@ contract WalletX {
         
         WalletMember memory member = WalletMember({
             memberAddress: _memberAddress,
+            adminAddress: msg.sender,
             organizationName: _organizationName,
             name: _memberName,
             active: true,
@@ -127,6 +129,7 @@ contract WalletX {
         for(uint256 i = 0; i < members.length; i++) {
             if (members[i].memberIdentifier == _memberIdentifier) {
                 members[i].spendLimit += _amount;
+                walletMember[members[i].memberAddress].spendLimit += _amount;
             }
         }
     }
@@ -135,8 +138,18 @@ contract WalletX {
         WalletMember storage member = walletMember[msg.sender];
 
         require(member.spendLimit >= _amount, "insufficient funds to withdraw");
+        require(walletAdmin[member.adminAddress].walletBalance >= _amount, "Insufficient funds in wallet");
 
         member.spendLimit -= _amount;
+        walletAdmin[member.adminAddress].walletBalance -= _amount;
+        WalletMember[] storage members = walletOrganisationMembers[member.adminAddress];
+
+        for(uint256 i = 0; i < members.length; i++) {
+            if (members[i].memberAddress == msg.sender) {
+                members[i].spendLimit -= _amount;
+            }
+        }
+
 
         IERC20(tokenAddress).transfer(_reciever, _amount);
 
