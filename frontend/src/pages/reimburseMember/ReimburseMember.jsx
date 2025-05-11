@@ -19,9 +19,11 @@ const ReimburseMember = () => {
       const data = await readOnlyOnboardContract.getMembers();
       const result = await data.toArray();
 
+      console.log(result);
+
       const parsedMembers = result.map((member) => ({
-        id: member[0],
-        name: member[2],
+        id: member[6],
+        name: member[3],
       }));
 
       setMembers(parsedMembers);

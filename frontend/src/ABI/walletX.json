@@ -46,6 +46,11 @@
             "type": "address"
           },
           {
+            "internalType": "address",
+            "name": "adminAddress",
+            "type": "address"
+          },
+          {
             "internalType": "string",
             "name": "organizationName",
             "type": "string"
@@ -124,6 +129,11 @@
           {
             "internalType": "address",
             "name": "memberAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "adminAddress",
             "type": "address"
           },
           {

@@ -41,11 +41,11 @@ const useReimburseMember = () => {
 
                 const estimatedGas = await contract.reimburseMember.estimateGas(
                     memberIdentifier,
-                    parsedAmount
+                    reimburseAmount
                 );
                 const tx = await contract.reimburseMember(
                     memberIdentifier,
-                    parsedAmount,
+                    reimburseAmount,
                     {
                         gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
                     }

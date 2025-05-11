@@ -36,11 +36,11 @@ const Dashboard = () => {
 
       // console.log("Members Data: ", result);
       
-
+      console.log(result);
       const parsedMembers = result.map((member) => ({
         id: member[0],
-        name: member[2],
-        spendLimit: member[4],
+        name: member[3],
+        spendLimit: member[5],
       }));
 
       setMembers(parsedMembers);
@@ -74,13 +74,15 @@ const Dashboard = () => {
 
       const parsedInfo = {
         address: info[0],
-        firstName: info[1],
-        lastName: info[2],
-        isActive: info[3],
-        spendLimit: info[4],
-        role: info[6],
+        firstName: info[2],
+        lastName: info[3],
+        isActive: info[4],
+        spendLimit: info[5],
+        role: info[7],
       };
 
+      console.log("parse data: ", parsedInfo);
+      
       setMemberInfo(parsedInfo);
     } catch (error) {
       console.log("Error fetching member info: ", error);

@@ -100,9 +100,13 @@ const DashboardLayout = () => {
         lastName: info[2],
         isActive: info[3],
         spendLimit: info[4],
-        role: info[6],
+        role: info[7],
       };
 
+      console.log(parsedInfo);
+      console.log(info);
+      
+      
       setMemberInfo(parsedInfo);
     } catch (error) {
       console.log("Error fetching member info: ", error);
