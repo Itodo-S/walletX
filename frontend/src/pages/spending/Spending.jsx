@@ -57,7 +57,6 @@ const Spending = () => {
     const fetchTransactions = async () => {
       if (address) {
         const response = await fetchMemberTransactions(address);
-        console.log("Member Transactions Response:", response);
 
         if (Array.isArray(response)) {
           const parsedTransactions = response.map((tx) => {
