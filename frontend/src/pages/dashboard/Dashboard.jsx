@@ -36,7 +36,6 @@ const Dashboard = () => {
 
       // console.log("Members Data: ", result);
       
-      console.log(result);
       const parsedMembers = result.map((member) => ({
         id: member[0],
         name: member[3],
@@ -80,9 +79,7 @@ const Dashboard = () => {
         spendLimit: info[5],
         role: info[7],
       };
-
-      console.log("parse data: ", parsedInfo);
-      
+            
       setMemberInfo(parsedInfo);
     } catch (error) {
       console.log("Error fetching member info: ", error);

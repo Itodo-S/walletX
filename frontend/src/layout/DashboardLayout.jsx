@@ -63,9 +63,10 @@ const DashboardLayout = () => {
   const readOnlyOnboardContract = useContract(true);
 
   const filteredNavItems =
-    adminRole === "admin" || memberInfo?.role === ""
-
-      ? navItems.filter((item) => item.name !== "Spend") // Hide "Spend" for admin
+    adminRole !== "admin" && memberInfo?.role === ""
+      ? navItems.filter((item) => item.name === "Register Wallet")
+      : adminRole === "admin"
+      ? navItems.filter((item) => item.name !== "Spend" && item.name !== "Register Wallet") // Hide "Spend" and "Register Wallet" for admin
       : navItems.filter(
           (item) => item.name === "Dashboard" || item.name === "Spend"
         );

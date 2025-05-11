@@ -1,15 +1,52 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import logo from "../../assets/logo.png";
 import { IconSun, IconMoon } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { NavLink } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useAppKitAccount } from "@reown/appkit/react"; 
+import { useAppKitAccount } from "@reown/appkit/react";
+import useContract from "../../hooks/useContract";
+import useAdminRole from "../../hooks/useAdminRole";
 
 const XWalletHeader = () => {
   const { address: connectedWalletAddress } = useAppKitAccount();
   const [darkMode, setDarkMode] = useState(false);
+   const [memberInfo, setMemberInfo] = useState(null);  
+ 
+
+  const { adminRole } = useAdminRole(connectedWalletAddress);
+
+  const readOnlyOnboardContract = useContract(true);
+
+  const fetchMemberInfo = useCallback(async () => {
+    if (!readOnlyOnboardContract) return;
+
+    try {
+      const info = await readOnlyOnboardContract.getMember();
+
+      const parsedInfo = {
+        address: info[0],
+        firstName: info[1],
+        lastName: info[2],
+        isActive: info[3],
+        spendLimit: info[4],
+        role: info[7],
+      };
+
+      // console.log(parsedInfo);
+      // console.log(info);
+      
+      
+      setMemberInfo(parsedInfo);
+    } catch (error) {
+      console.log("Error fetching member info: ", error);
+    }
+  }, [readOnlyOnboardContract]);
+
+  const isAdminOrEmptyRole = useCallback(() => {
+    return adminRole === "admin" || memberInfo?.role === "member";
+  }, [adminRole, memberInfo]);
 
   useEffect(() => {
     if (darkMode) {
@@ -25,6 +62,13 @@ const XWalletHeader = () => {
       toast.error("Please connect your wallet!");
     }
   };
+
+  useEffect(() => {
+    const loadData = async () => {
+      await Promise.all([fetchMemberInfo()]);
+    };
+    loadData();
+  }, [fetchMemberInfo]);
 
   return (
     <header className="w-full py-2 px-4 md:px-8 shadow-sm bg-primay dark:bg-card">
@@ -49,17 +93,35 @@ const XWalletHeader = () => {
           >
             Home
           </NavLink>
-          <NavLink
-            to="/dashboard"
-            onClick={handleWalletNavigation} 
-            className={({ isActive }) =>
-              `font-semibold ${
-                isActive ? "text-primary" : "hover:text-primary"
-              }`
-            }
-          >
-            Wallet
-          </NavLink>
+
+          {connectedWalletAddress && !isAdminOrEmptyRole() && (
+            <NavLink
+              to="/dashboard/register-wallet"
+              onClick={handleWalletNavigation}
+              className={({ isActive }) =>
+                `font-semibold ${
+                  isActive ? "text-primary" : "hover:text-primary"
+                }`
+              }
+            >
+              Register Wallet
+            </NavLink>
+          )}
+
+          {connectedWalletAddress && isAdminOrEmptyRole() && (
+            <NavLink
+              to="/dashboard"
+              onClick={handleWalletNavigation}
+              className={({ isActive }) =>
+                `font-semibold ${
+                  isActive ? "text-primary" : "hover:text-primary"
+                }`
+              }
+            >
+              Wallet
+            </NavLink>
+          )}
+
           <NavLink
             to="/contact"
             className={({ isActive }) =>
