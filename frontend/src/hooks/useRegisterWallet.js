@@ -39,7 +39,12 @@ const useRegisterWallet = () => {
 
                 const parsedPayment = parseUnits(fundAmount.toString(), 18);
 
-                const approveToken = await tokenContract.approve("0x3f4d0Fc9a72dcEDd31Df0255dC9a371C4624595A", parsedPayment);
+                if (!tokenContract) {
+                    toast.error("Token contract not initialized. Please reconnect wallet.");
+                    return;
+                }
+
+                const approveToken = await tokenContract.approve("0x2FaFA6557dFf892CB35A8A1024f564C6b0de45D1", parsedPayment);
 
                 const tokenReciept = await approveToken.wait();
 

@@ -1,33 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { IconUserPlus } from "@tabler/icons-react";
+import React, { useState } from "react";
+import { IconUserPlus, IconLoader } from "@tabler/icons-react";
 import useOnboardMember from "../../hooks/useOnboardMember";
 
 const OnboardMembers = () => {
   const handleOnboardMember = useOnboardMember();
-  const [ member, setMember ] = useState({
+  const [member, setMember] = useState({
     walletAddress: "",
     memberName: "",
     fundAmount: 0,
-    memberId: ""
-  })
+    memberId: "",
+  });
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleInputChange = (name, e) => {
-    console.log(e.target.name)
-    setMember((preState) => ({ ...preState, [name]:  e.target.value}));
-  }
+    setMember((preState) => ({ ...preState, [name]: e.target.value }));
+  };
 
-  const { walletAddress, 
-          memberName, 
-          fundAmount, 
-          memberId
-         } = member
-
-  useEffect(()=>{
-      console.log(member)
-     }
-        
-     ,[member])
-  
+  const { walletAddress, memberName, fundAmount, memberId } = member;
 
   return (
     <div className="max-w-xl mx-auto mt-10 bg-[hsl(var(--card))] p-8 rounded-xl border border-[hsl(var(--border))] shadow-md">
@@ -91,26 +80,33 @@ const OnboardMembers = () => {
 
         <div className="flex gap-4 pt-4">
           <button
-            // onClick={handleApprove}
-            className="bg-[hsl(var(--primary))] text-white px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.9)] transition"
-          >
-            Approve Tokens
-          </button>
-
-          <button
-            onClick={(e) => {
-              e.preventDefault()
-              console.log(walletAddress, memberName, fundAmount, memberId)
-              handleOnboardMember(
-                walletAddress, 
-                memberName, 
-                fundAmount, 
-                memberId
-              )
+            onClick={async (e) => {
+              e.preventDefault();
+              setIsProcessing(true);
+              try {
+                await handleOnboardMember(
+                  walletAddress,
+                  memberName,
+                  fundAmount,
+                  memberId
+                );
+                setMember({
+                  walletAddress: "",
+                  memberName: "",
+                  fundAmount: 0,
+                  memberId: "",
+                }); // this one na to Clear input fields after onboarding
+              } catch (error) {
+                console.error("Error during onboarding: ", error);
+              } finally {
+                setIsProcessing(false);
+              }
             }}
-            className="border border-[hsl(var(--primary))] text-[hsl(var(--primary))] px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.05)] transition"
+            className="border border-[hsl(var(--primary))] text-[hsl(var(--primary))] px-4 py-2 rounded-md hover:bg-[hsl(var(--primary)/0.05)] transition disabled:opacity-50 flex items-center gap-2"
+            disabled={isProcessing}
           >
-            Onboard Member
+            {isProcessing && <IconLoader size={18} className="animate-spin" />}
+            {isProcessing ? "Processing..." : "Onboard Member"}
           </button>
         </div>
       </div>

@@ -1,115 +1,191 @@
-import React from "react";
-import { toast } from "react-toastify";
+import React, { useCallback, useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
-
-// Mock data — we go replace with actual fetched data
-const userRole = "admin"; // or "member"
-const walletName = "XWallet Master";
-const organizationName = "Cantana Org";
-const walletBalance = "12.45 ETH";
-const memberSpendLimit = "3.00 ETH";
-const walletAddress = "0x1234...ABCD";
-
-const transactions = [
-  {
-    id: 1,
-    type: "Sent",
-    amount: "0.50 ETH",
-    to: "0xABCD...1234",
-    date: "2025-04-30",
-  },
-  {
-    id: 2,
-    type: "Received",
-    amount: "1.25 ETH",
-    from: "0x5678...EF90",
-    date: "2025-04-29",
-  },
-  {
-    id: 3,
-    type: "Sent",
-    amount: "0.75 ETH",
-    to: "0x9999...FFFF",
-    date: "2025-04-28",
-  },
-];
-
-const members = [
-  { id: 1, name: "Alice Johnson", role: "Member", wallet: "0xA1B2...C3D4" },
-  { id: 2, name: "Bob Smith", role: "Member", wallet: "0xE5F6...G7H8" },
-  { id: 3, name: "Jane Doe", role: "Member", wallet: "0xI9J0...K1L2" },
-];
+import useContract from "../../hooks/useContract";
+import { useAppKitAccount } from "@reown/appkit/react";
+import useAdminRole from "../../hooks/useAdminRole";
 
 const Dashboard = () => {
+  const { address: connectedWalletAddress } = useAppKitAccount();
+  const { adminRole } = useAdminRole(connectedWalletAddress);
+  // console.log("Admin Role: ", adminRole);
+
+  const userRole = adminRole || "member";
+  const [members, setMembers] = useState([]);
+  const [memberInfo, setMemberInfo] = useState(null);
+  const [walletInfo, setWalletInfo] = useState({
+    walletName: "",
+    walletBalance: "",
+    organizationName: "",
+    memberSpendLimit: "",
+  });
+
+  // console.log(members);
+  
+  // console.log("memberInfo: ", memberInfo);
+  
+  const [loading, setLoading] = useState(true);
+
+  const readOnlyOnboardContract = useContract(true);
+
+  const fetchMembers = useCallback(async () => {
+    if (!readOnlyOnboardContract) return;
+
+    try {
+      const data = await readOnlyOnboardContract.getMembers();
+      const result = await data.toArray();
+
+      // console.log("Members Data: ", result);
+      
+      const parsedMembers = result.map((member) => ({
+        id: member[0],
+        name: member[3],
+        spendLimit: member[5],
+      }));
+
+      setMembers(parsedMembers);
+    } catch (error) {
+      console.log("Error fetching members: ", error);
+    }
+  }, [readOnlyOnboardContract]);
+
+  const fetchWalletInfo = useCallback(async () => {
+    if (!readOnlyOnboardContract) return;
+
+    try {
+      const adminInfo = await readOnlyOnboardContract.getWalletAdmin();
+      const balance = adminInfo.walletBalance;
+      setWalletInfo({
+        walletName: adminInfo.walletName,
+        walletBalance: `${balance} USDT`,
+        organizationName: adminInfo.organizationName || "N/A",
+        memberSpendLimit: "N/A",
+      });
+    } catch (error) {
+      console.log("Error fetching wallet info: ", error);
+    }
+  }, [readOnlyOnboardContract]);
+
+  const fetchMemberInfo = useCallback(async () => {
+    if (!readOnlyOnboardContract) return;
+
+    try {
+      const info = await readOnlyOnboardContract.getMember();
+
+      const parsedInfo = {
+        address: info[0],
+        firstName: info[2],
+        lastName: info[3],
+        isActive: info[4],
+        spendLimit: info[5],
+        role: info[7],
+      };
+            
+      setMemberInfo(parsedInfo);
+    } catch (error) {
+      console.log("Error fetching member info: ", error);
+    }
+  }, [readOnlyOnboardContract]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      await Promise.all([fetchMembers(), fetchWalletInfo(), fetchMemberInfo()]);
+      setLoading(false);
+    };
+    loadData();
+  }, [fetchMembers, fetchWalletInfo, fetchMemberInfo]);
+
+  if (loading) {
+    return (
+      <div className="space-y-10 max-w-7xl mx-auto">
+        <div className="space-y-4">
+          <div className="h-8 bg-gray-300 rounded w-1/3 animate-pulse"></div>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+          </div>
+          <div className="h-8 bg-gray-300 rounded w-1/4 animate-pulse"></div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+            <div className="p-6 rounded-xl shadow border border-[hsl(var(--border))]">
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 max-w-7xl mx-auto">
       {/* Welcome Section */}
       <h2 className="text-2xl font-semibold text-[hsl(var(--foreground))]">
-        Welcome, {userRole === "admin" ? "Admin" : "Member"}
+        Welcome,{" "}
+        {userRole === "admin"
+          ? "Admin"
+          : `${memberInfo?.firstName || "Member"}`}
       </h2>
 
       {/* Info Cards */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <Card
-          title={userRole === "admin" ? "Wallet Name" : "Organization Name"}
-        >
-          {userRole === "admin" ? walletName : organizationName}
-        </Card>
-
-        <Card
-          title={userRole === "admin" ? "Wallet Balance" : "Your Spend Limit"}
-        >
-          {userRole === "admin" ? walletBalance : memberSpendLimit}
-        </Card>
-
-        <Card title="Role" className="capitalize">
-          {userRole}
-        </Card>
-
-        <Card title="Wallet Address" colSpanFull>
-          <span className="text-sm font-mono">{walletAddress}</span>
-        </Card>
+        {userRole === "admin" || memberInfo?.role === "" ? (
+          <>
+            <Card title="Wallet Name">{walletInfo.walletName}</Card>
+            <Card title="Wallet Balance">{walletInfo.walletBalance}</Card>
+            <Card title="Role" className="capitalize">
+              {userRole}
+            </Card>
+            <Card title="Wallet Address" colSpanFull>
+              <span className="text-sm font-mono">
+                {connectedWalletAddress
+                  ? `${connectedWalletAddress.slice(
+                      0,
+                      6
+                    )}...${connectedWalletAddress.slice(-4)}`
+                  : "Not Connected"}
+              </span>
+            </Card>
+          </>
+        ) : (
+          <>
+            <Card title="Organisation Name">{memberInfo?.firstName || "N/A"}</Card>
+            <Card title="Name">{memberInfo?.lastName || "N/A"}</Card>
+            <Card title="Spend Limit">
+              {memberInfo?.spendLimit ? `${memberInfo.spendLimit} USDT` : "N/A"}
+            </Card>
+            <Card title="Role" className="capitalize">
+              {memberInfo?.role || "N/A"}
+            </Card>
+            <Card title="Wallet Address" colSpanFull>
+              <span className="text-sm font-mono">
+                {memberInfo?.address
+                  ? `${memberInfo.address.slice(
+                      0,
+                      6
+                    )}...${memberInfo.address.slice(-4)}`
+                  : "Not Connected"}
+              </span>
+            </Card>
+          </>
+        )}
       </div>
-
-      {/* Recent Transactions Table */}
-      <section>
-        <h3 className="text-xl font-semibold mb-4 text-[hsl(var(--foreground))]">
-          Recent Transactions
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm border border-[hsl(var(--border))] rounded-lg overflow-hidden">
-            <thead className="bg-[hsl(var(--card))] text-[hsl(var(--muted-text))]">
-              <tr>
-                <th className="text-left p-3 border-b border-[hsl(var(--border))]">
-                  Type
-                </th>
-                <th className="text-left p-3 border-b border-[hsl(var(--border))]">
-                  Amount
-                </th>
-                <th className="text-left p-3 border-b border-[hsl(var(--border))]">
-                  To/From
-                </th>
-                <th className="text-left p-3 border-b border-[hsl(var(--border))]">
-                  Date
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((tx) => (
-                <tr
-                  key={tx.id}
-                  className="bg-[hsl(var(--card))] hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))] transition"
-                >
-                  <td className="p-3">{tx.type}</td>
-                  <td className="p-3">{tx.amount}</td>
-                  <td className="p-3">{tx.to || tx.from}</td>
-                  <td className="p-3">{tx.date}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
 
       {/* Member List */}
       {userRole === "admin" && (
@@ -123,7 +199,8 @@ const Dashboard = () => {
                 key={member.id}
                 className="relative bg-[hsl(var(--card))] p-5 rounded-lg border border-[hsl(var(--border))] shadow"
                 style={{
-                  backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0))",
+                  backgroundImage:
+                    "linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0))",
                 }}
               >
                 <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[hsl(var(--foreground))] to-transparent opacity-10 pointer-events-none"></div>
@@ -131,10 +208,13 @@ const Dashboard = () => {
                   {member.name}
                 </h4>
                 <p className="text-sm text-[hsl(var(--muted-text))] mb-1">
-                  Role: {member.role}
+                  Role: Member
+                </p>
+                <p className="text-sm text-[hsl(var(--muted-text))] mb-1">
+                  Spend Limit: {member.spendLimit ? `${member.spendLimit} USDT` : "N/A"}
                 </p>
                 <p className="text-sm text-[hsl(var(--muted-text))] break-words">
-                  Wallet: {member.wallet}
+                  Wallet: {`${member.id.slice(0, 6)}...${member.id.slice(-4)}`}
                 </p>
               </li>
             ))}
@@ -151,7 +231,8 @@ const Card = ({ title, children, className = "", colSpanFull = false }) => (
       colSpanFull ? "col-span-full lg:col-span-1" : ""
     }`}
     style={{
-      backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0))",
+      backgroundImage:
+        "linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0))",
     }}
   >
     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[hsl(var(--foreground))] to-transparent opacity-10 pointer-events-none"></div>
