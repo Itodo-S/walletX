@@ -42,6 +42,9 @@ const ReimburseMember = () => {
     setIsProcessing(true);
     try {
       await reimburseMember(selectedMember, amount);
+      // Clear the form fields after successful transaction
+      setSelectedMember("");
+      setAmount("");
     } catch (error) {
       console.error("Error during reimbursement: ", error);
     } finally {
