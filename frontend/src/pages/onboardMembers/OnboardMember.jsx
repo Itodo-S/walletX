@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { IconUserPlus, IconLoader } from "@tabler/icons-react";
+import { useNavigate } from "react-router-dom"; // Added import for navigation
 import useOnboardMember from "../../hooks/useOnboardMember";
 
 const OnboardMembers = () => {
   const handleOnboardMember = useOnboardMember();
+  const navigate = useNavigate(); // Initialize navigation
   const [member, setMember] = useState({
     walletAddress: "",
     memberName: "",
@@ -95,7 +97,8 @@ const OnboardMembers = () => {
                   memberName: "",
                   fundAmount: 0,
                   memberId: "",
-                }); // this one na to Clear input fields after onboarding
+                }); // Clear input fields after onboarding
+                navigate("/dashboard"); 
               } catch (error) {
                 console.error("Error during onboarding: ", error);
               } finally {
